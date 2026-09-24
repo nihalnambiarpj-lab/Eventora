@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("CUSTOMER") // CUSTOMER, ADMIN
+  phone     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
+}
+
+model Venue {
+  id         String     @id @default(uuid())
+  name       String
+  address    String
+  city       String
+  totalSeats Int
+  screenType String     @default("CINEMA_CURVED") // CINEMA_CURVED, STAGE_CONCERT, THEATRE
+  screens    Screen[]
+  showtimes  Showtime[]
+}
+
+model Screen {
+  id           String     @id @default(uuid())
+  venueId      String
+  venue        Venue      @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name         String
+  rowsCount    Int        @default(10)
+  colsCount    Int        @default(12)
+  aisleGaps    String     @default("[5]") // JSON array of column indices after which an aisle gap occurs
+  seats        Seat[]
+  showtimes    Showtime[]
+}
+
+model Seat {
+  id              String        @id @default(uuid())
+  screenId        String
+  screen          Screen        @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  rowLabel        String        // A, B, C, D...
+  seatNumber      Int           // 1, 2, 3...
+  tier            String        @default("SILVER") // SILVER, GOLD, PREMIUM, RECLINER
+  priceMultiplier Float         @default(1.0)
+  bookingSeats    BookingSeat[]
+
+  @@unique([screenId, rowLabel, seatNumber])
+}
+
+model Event {
+  id          String     @id @default(uuid())
+  title       String
+  subtitle    String
+  category    String     // Movies, Concerts, Sports, Comedy, Theatre
+  image       String
+  description String
+  duration    String
+  language    String
+  rating      Float      @default(4.5)
+  reviewCount Int        @default(1000)
+  priceMin    Int
+  featured    Boolean    @default(false)
+  trending    Boolean    @default(false)
+  tags        String     @default("[]") // JSON string array
+  createdAt   DateTime   @default(now())
+  showtimes   Showtime[]
+}
+
+model Showtime {
+  id           String        @id @default(uuid())
+  eventId      String
+  event        Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  venueId      String
+  venue        Venue         @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  screenId     String
+  screen       Screen        @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  startTime    DateTime
+  priceBase    Int
+  bookings     Booking[]
+  bookingSeats BookingSeat[]
+}
+
+model Booking {
+  id             String        @id @default(uuid())
+  bookingCode    String        @unique // e.g. EVT-9F8A72
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  showtimeId     String
+  showtime       Showtime      @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  totalAmount    Int
+  convenienceFee Int
+  status         String        @default("CONFIRMED") // CONFIRMED, CANCELLED
+  qrCode         String        // QR payload data
+  createdAt      DateTime      @default(now())
+  seats          BookingSeat[]
+  payment        Payment?
+}
+
+model BookingSeat {
+  id         String   @id @default(uuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  seatId     String
+  seat       Seat     @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  showtimeId String
+  showtime   Showtime @relation(fields: [showtimeId], references: [id], onDelete: Cascade)
+  pricePaid  Int
+
+  // CRITICAL UNIQUE CONSTRAINT: Prevents physical double-booking at DB level!
+  @@unique([showtimeId, seatId])
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  bookingId     String   @unique
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  paymentMethod String   // CARD, UPI, NETBANKING
+  transactionId String   @unique
+  amount        Int
+  status        String   @default("SUCCESS") // SUCCESS, FAILED
+  createdAt     DateTime @default(now())
+}
