@@ -45,8 +45,9 @@ export default function SeatMapModal({ event, initialShowtimeId, onClose, onRequ
   const [seatData, setSeatData] = useState(null);
   const [selectedSeatIds, setSelectedSeatIds] = useState([]);
   const [hoveredSeat, setHoveredSeat] = useState(null);
-  const [step, setStep] = useState(1); // 1 = Seat Map, 2 = Payment Checkout, 3 = Confirmed Ticket
+  const [step, setStep] = useState(0); // 0 = Date & Time, 1 = Seat Map, 2 = Payment, 3 = Confirmed
   const [submitting, setSubmitting] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null); // 'YYYY-MM-DD' string
   const [bookingResult, setBookingResult] = useState(null);
 
   // Payment form state
@@ -286,69 +287,226 @@ export default function SeatMapModal({ event, initialShowtimeId, onClose, onRequ
             </button>
           </div>
 
-          {/* Progress Indicator */}
-          <div className="bg-[#0e1420] border-b border-slate-800/80 px-6 py-2.5 flex items-center justify-between text-xs font-semibold flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                step >= 1 ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'
-              }`}>1</span>
-              <span className={step >= 1 ? 'text-indigo-400' : 'text-slate-500'}>Select Seats</span>
-            </div>
-            <div className="w-12 h-0.5 bg-slate-800" />
-            <div className="flex items-center gap-2">
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                step >= 2 ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'
-              }`}>2</span>
-              <span className={step >= 2 ? 'text-indigo-400' : 'text-slate-500'}>Payment</span>
-            </div>
-            <div className="w-12 h-0.5 bg-slate-800" />
-            <div className="flex items-center gap-2">
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                step === 3 ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'
-              }`}>3</span>
-              <span className={step === 3 ? 'text-emerald-400' : 'text-slate-500'}>Confirmed Ticket</span>
-            </div>
+          {/* Progress Indicator — 4 steps */}
+          <div className="bg-[#0e1420] border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between text-xs font-semibold flex-shrink-0">
+            {[
+              { n: 0, label: 'Date & Time' },
+              { n: 1, label: 'Select Seats' },
+              { n: 2, label: 'Payment' },
+              { n: 3, label: 'Confirmed', emerald: true },
+            ].map(({ n, label, emerald }, idx) => (
+              <>
+                <div key={n} className="flex items-center gap-1.5">
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                    step === n && emerald ? 'bg-emerald-600 text-white'
+                    : step > n ? 'bg-indigo-600 text-white'
+                    : step === n ? 'bg-indigo-600 text-white'
+                    : 'bg-slate-800 text-slate-400'
+                  }`}>{step > n ? '✓' : n + 1}</span>
+                  <span className={`hidden sm:inline ${
+                    step === n && emerald ? 'text-emerald-400'
+                    : step >= n ? 'text-indigo-400'
+                    : 'text-slate-500'
+                  }`}>{label}</span>
+                </div>
+                {idx < 3 && <div className={`flex-1 h-0.5 mx-1 ${step > n ? 'bg-indigo-600' : 'bg-slate-800'}`} />}
+              </>
+            ))}
           </div>
 
           {/* Body content based on step */}
           <div className="flex-1 overflow-y-auto p-3 sm:p-5 bg-[#0B0F17]">
+
+            {/* ─── Step 0: Date & Time Picker ─── */}
+            {step === 0 && (() => {
+              // Group showtimes by date
+              const dateMap = {};
+              showtimesList.forEach(st => {
+                const d = new Date(st.startTime);
+                const key = isNaN(d.getTime()) ? 'today' : d.toISOString().split('T')[0];
+                if (!dateMap[key]) dateMap[key] = [];
+                dateMap[key].push(st);
+              });
+              const dateKeys = Object.keys(dateMap).sort();
+              const selectedDateKey = selectedDate || dateKeys[0] || null;
+              const timesForDate = selectedDateKey ? (dateMap[selectedDateKey] || []) : [];
+
+              return (
+                <div className="max-w-2xl mx-auto space-y-6 py-2">
+                  {/* Decorative header */}
+                  <div className="text-center space-y-1">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-600/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+                      <Calendar className="w-3.5 h-3.5" /> Choose your Date & Time
+                    </div>
+                    <p className="text-slate-400 text-xs mt-2">Select a date first, then pick your preferred showtime</p>
+                  </div>
+
+                  {showtimesList.length === 0 ? (
+                    <div className="text-center py-12 text-slate-500 text-sm border border-dashed border-slate-700 rounded-2xl">
+                      <Calendar className="w-8 h-8 mx-auto mb-2 text-slate-600" />
+                      No showtimes available for this event yet.
+                    </div>
+                  ) : (
+                    <>
+                      {/* ── Date selector ── */}
+                      <div className="space-y-3">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">1 — Pick a Date</h3>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                          {dateKeys.map(dk => {
+                            const d = new Date(dk);
+                            const isValid = !isNaN(d.getTime());
+                            const isSelected = selectedDateKey === dk;
+                            const dayName = isValid ? d.toLocaleDateString('en-IN', { weekday: 'short' }) : 'Today';
+                            const dayNum = isValid ? d.getDate() : new Date().getDate();
+                            const monthName = isValid ? d.toLocaleDateString('en-IN', { month: 'short' }) : 'Now';
+                            const isToday = isValid && d.toDateString() === new Date().toDateString();
+                            const slotCount = dateMap[dk].length;
+
+                            return (
+                              <button
+                                key={dk}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedDate(dk);
+                                  // Auto-select first showtime on this date
+                                  const firstSt = dateMap[dk][0];
+                                  if (firstSt?.id) {
+                                    setShowtimeId(firstSt.id);
+                                    setSelectedSeatIds([]);
+                                  }
+                                }}
+                                className={`relative p-3 rounded-2xl border-2 text-center transition-all ${
+                                  isSelected
+                                    ? 'bg-indigo-600/20 border-indigo-500 shadow-lg shadow-indigo-500/20'
+                                    : 'bg-slate-800/60 border-slate-700/60 hover:border-slate-600 hover:bg-slate-800'
+                                }`}
+                              >
+                                {isToday && (
+                                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 text-[9px] font-bold bg-indigo-600 text-white rounded-full whitespace-nowrap">
+                                    TODAY
+                                  </span>
+                                )}
+                                <p className={`text-[10px] font-semibold uppercase tracking-wide ${
+                                  isSelected ? 'text-indigo-300' : 'text-slate-500'
+                                }`}>{dayName}</p>
+                                <p className={`text-2xl font-extrabold leading-tight ${
+                                  isSelected ? 'text-white' : 'text-slate-200'
+                                }`}>{dayNum}</p>
+                                <p className={`text-[10px] font-medium ${
+                                  isSelected ? 'text-indigo-300' : 'text-slate-500'
+                                }`}>{monthName}</p>
+                                <p className={`text-[10px] mt-1 font-semibold ${
+                                  isSelected ? 'text-indigo-400' : 'text-slate-600'
+                                }`}>{slotCount} slot{slotCount !== 1 ? 's' : ''}</p>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* ── Time slot selector ── */}
+                      {selectedDateKey && (
+                        <div className="space-y-3">
+                          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">2 — Pick a Time</h3>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {timesForDate.map(st => {
+                              const d = new Date(st.startTime);
+                              const isValid = !isNaN(d.getTime());
+                              const timeStr = isValid
+                                ? d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+                                : (typeof st.startTime === 'string' ? st.startTime : '7:00 PM');
+                              const isPast = isValid && d < new Date();
+                              const isSelected = showtimeId === st.id;
+
+                              return (
+                                <button
+                                  key={st.id}
+                                  type="button"
+                                  disabled={isPast}
+                                  onClick={() => {
+                                    setShowtimeId(st.id);
+                                    setSelectedSeatIds([]);
+                                  }}
+                                  className={`relative p-4 rounded-2xl border-2 text-left transition-all ${
+                                    isPast
+                                      ? 'opacity-40 cursor-not-allowed bg-slate-900 border-slate-800'
+                                      : isSelected
+                                      ? 'bg-indigo-600/20 border-indigo-500 shadow-lg shadow-indigo-500/20'
+                                      : 'bg-slate-800/60 border-slate-700/60 hover:border-indigo-500/50 hover:bg-slate-800'
+                                  }`}
+                                >
+                                  {isSelected && (
+                                    <span className="absolute top-2.5 right-2.5 w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center">
+                                      <Info className="w-2.5 h-2.5 text-white" />
+                                    </span>
+                                  )}
+                                  <p className={`text-base font-extrabold ${
+                                    isSelected ? 'text-indigo-300' : 'text-white'
+                                  }`}>{timeStr}</p>
+                                  {st.venue?.name && (
+                                    <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+                                      <MapPin className="w-3 h-3 text-indigo-500 flex-shrink-0" />
+                                      <span className="truncate">{st.venue.name}</span>
+                                    </p>
+                                  )}
+                                  {st.priceBase && (
+                                    <p className="text-[11px] text-emerald-400 font-bold mt-1">from ₹{st.priceBase}</p>
+                                  )}
+                                  {isPast && <p className="text-[10px] text-red-400 mt-1">Show ended</p>}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* CTA */}
+                      <button
+                        type="button"
+                        disabled={!showtimeId}
+                        onClick={() => setStep(1)}
+                        className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30"
+                      >
+                        <Clock className="w-4 h-4" />
+                        Continue to Seat Selection
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
+
             {step === 1 && (
               <div className="space-y-4">
-                {/* Showtime selector pills */}
-                {showtimesList.length > 0 && (
-                  <div className="bg-[#121927] p-3 rounded-2xl border border-slate-800 flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex-shrink-0 flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-indigo-400" /> Showtimes:
-                    </span>
-                    {showtimesList.map(st => {
-                      const dateObj = new Date(st.startTime);
-                      const timeStr = !isNaN(dateObj.getTime())
-                        ? dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                        : (typeof st.startTime === 'string' ? st.startTime : '7:00 PM');
-                      const dayStr = !isNaN(dateObj.getTime())
-                        ? dateObj.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })
-                        : 'Today';
-
-                      return (
-                        <button
-                          key={st.id}
-                          onClick={() => {
-                            setShowtimeId(st.id);
-                            setSelectedSeatIds([]);
-                          }}
-                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 flex-shrink-0 border ${
-                            showtimeId === st.id
-                              ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/30'
-                              : 'bg-slate-800/80 border-slate-700/80 text-slate-300 hover:bg-slate-700 hover:text-white'
-                          }`}
-                        >
-                          <span>{timeStr}</span>
-                          <span className="text-[10px] opacity-75 font-normal">({dayStr})</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                {/* Compact selected showtime reminder pill */}
+                {showtimeId && showtimesList.length > 0 && (() => {
+                  const st = showtimesList.find(s => s.id === showtimeId);
+                  if (!st) return null;
+                  const d = new Date(st.startTime);
+                  const isValid = !isNaN(d.getTime());
+                  const timeStr = isValid
+                    ? d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+                    : '';
+                  const dayStr = isValid
+                    ? d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })
+                    : 'Selected';
+                  return (
+                    <div className="bg-[#121927] px-4 py-2.5 rounded-2xl border border-slate-800 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                        <span className="text-xs text-slate-300 font-medium">{dayStr} · <span className="text-indigo-300 font-bold">{timeStr}</span></span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setStep(0)}
+                        className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-2"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  );
+                })()}
 
                 {/* Real Multiplex Tier Legend */}
                 <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs font-medium bg-[#111726] py-2.5 px-4 rounded-2xl border border-slate-800/80">
@@ -771,7 +929,8 @@ export default function SeatMapModal({ event, initialShowtimeId, onClose, onRequ
             )}
           </div>
 
-          {/* Sticky Bottom Bar */}
+          {/* Sticky Bottom Bar — only for seat, payment and confirmation steps */}
+          {step >= 1 && (
           <div className="bg-[#101726] border-t border-slate-800 p-4 px-6 flex items-center justify-between flex-shrink-0 shadow-xl">
             {step === 1 && (
               <>
@@ -787,6 +946,14 @@ export default function SeatMapModal({ event, initialShowtimeId, onClose, onRequ
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(0)}
+                    className="px-3 py-2.5 border border-slate-700 hover:bg-slate-800 text-slate-400 font-semibold rounded-xl text-xs flex items-center gap-1 transition-colors"
+                    title="Change date/time"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
                   <button
                     onClick={() => {
                       if (selectedSeatIds.length === 0) {
@@ -844,6 +1011,7 @@ export default function SeatMapModal({ event, initialShowtimeId, onClose, onRequ
               </button>
             )}
           </div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>

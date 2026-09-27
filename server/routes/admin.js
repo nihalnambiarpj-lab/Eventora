@@ -137,6 +137,79 @@ router.get('/venues', async (req, res) => {
   }
 });
 
+// POST /api/admin/venues — Create new venue with screens and seats
+router.post('/venues', async (req, res) => {
+  try {
+    const { name, address, city, screenType, screens } = req.body;
+
+    if (!name || !address || !city || !screenType || !Array.isArray(screens) || screens.length === 0) {
+      return res.status(400).json({ error: 'Missing required venue fields.' });
+    }
+
+    const totalSeats = screens.reduce((sum, s) => sum + (s.rowsCount * s.colsCount), 0);
+
+    // Create venue + screens in one go
+    const venue = await prisma.venue.create({
+      data: {
+        name,
+        address,
+        city,
+        totalSeats,
+        screenType,
+        screens: {
+          create: screens.map(s => ({
+            name: s.name,
+            rowsCount: parseInt(s.rowsCount, 10),
+            colsCount: parseInt(s.colsCount, 10),
+            aisleGaps: JSON.stringify(
+              Array.isArray(s.aisleGaps) ? s.aisleGaps : [Math.floor(s.colsCount / 2)]
+            ),
+          })),
+        },
+      },
+      include: { screens: true },
+    });
+
+    // Generate seat records for each screen
+    const rowLabels = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'];
+    for (const screen of venue.screens) {
+      const seatsData = [];
+      const usedLabels = rowLabels.slice(0, screen.rowsCount);
+      usedLabels.forEach((rowLabel, rIdx) => {
+        let tier = 'SILVER', multiplier = 1.0;
+        if (rIdx >= screen.rowsCount - 2) { tier = 'RECLINER'; multiplier = 2.5; }
+        else if (rIdx >= screen.rowsCount - 4) { tier = 'PREMIUM'; multiplier = 1.8; }
+        else if (rIdx >= screen.rowsCount - 6) { tier = 'GOLD'; multiplier = 1.4; }
+        for (let num = 1; num <= screen.colsCount; num++) {
+          seatsData.push({ screenId: screen.id, rowLabel, seatNumber: num, tier, priceMultiplier: multiplier });
+        }
+      });
+      await prisma.seat.createMany({ data: seatsData });
+    }
+
+    // Return fresh venue with seat counts
+    const fullVenue = await prisma.venue.findUnique({
+      where: { id: venue.id },
+      include: { screens: { include: { seats: true } } },
+    });
+
+    res.status(201).json(fullVenue);
+  } catch (err) {
+    console.error('Create venue error:', err);
+    res.status(500).json({ error: 'Failed to create venue.' });
+  }
+});
+
+// DELETE /api/admin/venues/:id — Delete venue
+router.delete('/venues/:id', async (req, res) => {
+  try {
+    await prisma.venue.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Venue deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete venue.' });
+  }
+});
+
 // GET /api/admin/bookings — All bookings
 router.get('/bookings', async (req, res) => {
   try {
