@@ -22,9 +22,9 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
-import { apiFetch } from '../api/client';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { apiFetch } from '../../api/client';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 export default function SeatMapModal({ event, initialShowtimeId, onClose, onRequireAuth }) {
   const { user, login } = useAuth();

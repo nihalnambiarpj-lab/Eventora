@@ -1,0 +1,49 @@
+{
+  "layoutType": "CINEMA_CURVED",
+  "displayName": "Cinema Multiplex & IMAX Curved Screen Layout",
+  "description": "Standard modern cinema multiplex layout with curved projection screen, central aisle gangways, and tiered seating.",
+  "screen": {
+    "type": "CURVED_PROJECTION",
+    "focalLength": "120deg",
+    "glowColor": "#22d3ee"
+  },
+  "dimensions": {
+    "rowsCount": 10,
+    "colsCount": 14,
+    "aisleGaps": [4, 10]
+  },
+  "tiers": [
+    {
+      "tier": "SILVER",
+      "displayName": "Classic Silver",
+      "rows": ["A", "B", "C", "D"],
+      "priceMultiplier": 1.0,
+      "color": "sky",
+      "description": "Front standard cinema viewing"
+    },
+    {
+      "tier": "GOLD",
+      "displayName": "Executive Gold",
+      "rows": ["E", "F"],
+      "priceMultiplier": 1.4,
+      "color": "teal",
+      "description": "Mid-tier optimal viewing angle"
+    },
+    {
+      "tier": "PREMIUM",
+      "displayName": "Prime Club",
+      "rows": ["G", "H"],
+      "priceMultiplier": 1.8,
+      "color": "purple",
+      "description": "Upper tier prime sound & visual sweet spot"
+    },
+    {
+      "tier": "RECLINER",
+      "displayName": "Luxury Recliner",
+      "rows": ["I", "J"],
+      "priceMultiplier": 2.5,
+      "color": "amber",
+      "description": "Motorized plush recliners with food service"
+    }
+  ]
+}

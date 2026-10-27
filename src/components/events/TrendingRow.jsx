@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { ChevronLeft, ChevronRight, Star, Calendar, MapPin, Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { trendingEvents } from '../data/events';
+import { trendingEvents } from '../../data/events';
 
 export default function TrendingRow({ onBook }) {
   const scrollRef = useRef(null);

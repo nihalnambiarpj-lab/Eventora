@@ -110,28 +110,88 @@ npm run dev
 
 ---
 
-## 📂 Project Structure
+- **🔄 Flexible Partial & Full Ticket Cancellation**:
+  - Booked multiple tickets (e.g. 2 tickets)? Cancel **1 ticket or all tickets** directly from the user profile modal.
+  - Automatic dynamic 95% refund calculator.
+  - Cancelled seats are immediately unlocked in real-time in the database for other customers to book.
+  - Full cancellation marks the booking as `CANCELLED`; partial cancellation updates the booking total and preserves the remaining active tickets.
+
+---
+
+## 📂 Neatly Organized Project Structure
+
+The project is structured into modular, neatly labelled folders so anyone can easily navigate between **Frontend**, **Backend**, and **Database**:
 
 ```
-eventora/
-├── public/
-│   ├── posters/          # High-resolution local poster assets for all events
-│   ├── ipl_final_poster.jpg
-│   └── fifa_qualifier_poster.jpg
-├── server/
-│   ├── prisma/           # Prisma schema & SQLite database
-│   ├── routes/           # Auth, Events, Showtimes, Bookings, Admin API
-│   ├── seed.js           # Database seed script
-│   └── index.js          # Express application entrypoint
-├── src/
-│   ├── api/              # API fetch client
-│   ├── components/       # UI components (Hero, EventCard, SeatMapModal, AdminLayout, etc.)
-│   ├── context/          # Auth and Toast notification contexts
-│   ├── data/             # Static event catalogs & category data
-│   ├── App.jsx           # Main application view & router
-│   ├── index.css         # Tailwind & custom glassmorphism styles
-│   └── main.jsx          # React DOM entry
-├── .env.example
+Eventora/
+├── 📁 database/                        # Database Architecture & Venue Layout Models
+│   ├── 📁 layouts/                     # Physical screen & stadium layout definitions
+│   │   ├── cinema_layout.json          # Curved cinema screen (rows A-J, aisles 4 & 10, multi-tier)
+│   │   ├── concert_layout.json         # Stadium concert stage (arena stands, VIP front pit, lounge box)
+│   │   └── theatre_layout.json         # Acoustic theatre proscenium (balcony, dress circle, orchestra stalls)
+│   └── README.md                       # Complete ERD diagram and database documentation
+│
+├── 📁 server/                          # Backend Node.js / Express Architecture
+│   ├── 📁 middleware/                  # Request guards (JWT authentication)
+│   │   └── auth.js
+│   ├── 📁 prisma/                      # Database engine & migrations
+│   │   ├── dev.db                      # Local SQLite database
+│   │   ├── schema.prisma               # Prisma relational schema
+│   │   └── migrations/                 # Migration history
+│   ├── 📁 routes/                      # REST API Endpoint Handlers
+│   │   ├── admin.js                    # Admin metrics, event management & analytics
+│   │   ├── auth.js                     # Registration, login, profile & JWT issuance
+│   │   ├── bookings.js                 # Atomic booking creation & partial/full cancellation
+│   │   ├── events.js                   # Public event discovery, filters & search
+│   │   └── showtimes.js                # Showtime dates, screen info & seat maps
+│   ├── 📁 tests/                       # Automated test suites
+│   │   ├── booking.test.js             # Concurrency double-booking race condition test
+│   │   └── cancellation.test.js        # Partial & full ticket cancellation verification test
+│   ├── index.js                        # Express server entry point (PORT 5000)
+│   └── seed.js                         # Database seed script for venues, screens & events
+│
+├── 📁 src/                             # Frontend React Application
+│   ├── 📁 api/                         # HTTP Client
+│   │   └── client.js                   # Unified apiFetch wrapper with JWT handling
+│   ├── 📁 components/                  # Neatly Categorized UI Components
+│   │   ├── 📁 admin/                   # Admin portal dashboards, tables & management
+│   │   │   ├── AdminDashboard.jsx
+│   │   │   ├── AdminBookings.jsx
+│   │   │   ├── AdminEvents.jsx
+│   │   │   ├── AdminLayout.jsx
+│   │   │   ├── AdminUsers.jsx
+│   │   │   └── AdminVenues.jsx
+│   │   ├── 📁 auth/                    # Authentication modals & forms
+│   │   │   └── AuthModal.jsx
+│   │   ├── 📁 booking/                 # Seat selection, payment & ticket cancellation
+│   │   │   ├── SeatMapModal.jsx        # Interactive SVG cinema/concert seat layout
+│   │   │   └── UserProfileModal.jsx    # Booking history, QR ticket & 1-or-all ticket cancellation
+│   │   ├── 📁 events/                  # Event discovery components
+│   │   │   ├── CategoryFilter.jsx
+│   │   │   ├── EventCard.jsx
+│   │   │   ├── EventGrid.jsx
+│   │   │   ├── EventModal.jsx
+│   │   │   └── TrendingRow.jsx
+│   │   ├── 📁 layout/                  # Page shell & presentation
+│   │   │   ├── AppBanner.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   ├── Header.jsx
+│   │   │   ├── Hero.jsx
+│   │   │   └── Testimonials.jsx
+│   │   └── 📁 ui/                      # Shared reusable UI primitives
+│   │       ├── SkeletonCard.jsx
+│   │       └── Toast.jsx
+│   ├── 📁 context/                     # Global State Management
+│   │   ├── AuthContext.jsx             # User login, logout, role & token state
+│   │   └── ToastContext.jsx            # Notification toast queue
+│   ├── 📁 data/                        # Static metadata & categories
+│   │   └── events.js
+│   ├── App.jsx                         # Main application orchestrator
+│   ├── index.css                       # Tailwind v4 styles & glassmorphism theme
+│   └── main.jsx                        # React entry point
+│
+├── 📁 public/                          # Public static assets & event posters
+│   └── 📁 posters/                     # High-res posters for movies, concerts & sports
 ├── package.json
 └── vite.config.js
 ```

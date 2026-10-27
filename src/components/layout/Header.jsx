@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, MapPin, Menu, X, Ticket, ChevronDown, User, Shield, LogOut, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
-import { apiFetch } from '../api/client';
+import { useAuth } from '../../context/AuthContext';
+import { apiFetch } from '../../api/client';
 
 const CITIES = ['Mumbai', 'New Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Ahmedabad'];
 const NAV_LINKS = ['Movies', 'Concerts', 'Sports', 'Comedy', 'Theatre'];

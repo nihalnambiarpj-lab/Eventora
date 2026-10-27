@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { CATEGORIES } from '../data/events';
+import { CATEGORIES } from '../../data/events';
 import { Film, Music, Trophy, Laugh, Theater, Sparkles } from 'lucide-react';
 
 const CATEGORY_ICONS = {

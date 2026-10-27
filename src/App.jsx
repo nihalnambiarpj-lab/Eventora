@@ -1,25 +1,37 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import EventGrid from './components/EventGrid';
-import TrendingRow from './components/TrendingRow';
-import AppBanner from './components/AppBanner';
-import Testimonials from './components/Testimonials';
-import Footer from './components/Footer';
 
-// Modals & Fullstack additions
+// ── Layout Components (header, footer, hero, banners) ──
+import Header      from './components/layout/Header';
+import Hero        from './components/layout/Hero';
+import AppBanner   from './components/layout/AppBanner';
+import Testimonials from './components/layout/Testimonials';
+import Footer      from './components/layout/Footer';
+
+// ── Event Discovery Components ──
+import EventGrid   from './components/events/EventGrid';
+import TrendingRow from './components/events/TrendingRow';
+
+// ── Auth Components ──
+import AuthModal   from './components/auth/AuthModal';
+
+// ── Booking / Ticket Components ──
+import UserProfileModal from './components/booking/UserProfileModal';
+import SeatMapModal     from './components/booking/SeatMapModal';
+
+// ── Admin Panel Components ──
+import AdminLayout    from './components/admin/AdminLayout';
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminEvents    from './components/admin/AdminEvents';
+import AdminVenues    from './components/admin/AdminVenues';
+import AdminBookings  from './components/admin/AdminBookings';
+import AdminUsers     from './components/admin/AdminUsers';
+
+// ── Global State / Contexts ──
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider, useToast } from './context/ToastContext';
-import AuthModal from './components/AuthModal';
-import UserProfileModal from './components/UserProfileModal';
-import SeatMapModal from './components/SeatMapModal';
-import AdminLayout from './components/admin/AdminLayout';
-import AdminDashboard from './components/admin/AdminDashboard';
-import AdminEvents from './components/admin/AdminEvents';
-import AdminVenues from './components/admin/AdminVenues';
-import AdminBookings from './components/admin/AdminBookings';
-import AdminUsers from './components/admin/AdminUsers';
+
+// ── API Client ──
 import { apiFetch } from './api/client';
 
 function MainStorefront() {
@@ -73,11 +85,11 @@ function MainStorefront() {
         setActiveTab={setAdminTab}
         onExitAdmin={() => setViewingAdmin(false)}
       >
-        {adminTab === 'overview' && <AdminDashboard />}
-        {adminTab === 'events' && <AdminEvents />}
-        {adminTab === 'venues' && <AdminVenues />}
-        {adminTab === 'bookings' && <AdminBookings />}
-        {adminTab === 'users' && <AdminUsers />}
+        {adminTab === 'overview'  && <AdminDashboard />}
+        {adminTab === 'events'    && <AdminEvents />}
+        {adminTab === 'venues'    && <AdminVenues />}
+        {adminTab === 'bookings'  && <AdminBookings />}
+        {adminTab === 'users'     && <AdminUsers />}
       </AdminLayout>
     );
   }

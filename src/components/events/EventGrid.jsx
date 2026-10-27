@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import EventCard from './EventCard';
 import CategoryFilter from './CategoryFilter';
-import SkeletonCard from './SkeletonCard';
-import { apiFetch } from '../api/client';
-import { events as mockEvents } from '../data/events';
+import SkeletonCard from '../ui/SkeletonCard';
+import { apiFetch } from '../../api/client';
+import { events as mockEvents } from '../../data/events';
 import { Sparkles, Compass } from 'lucide-react';
 
 export default function EventGrid({ activeCategory, setActiveCategory, searchQuery, onBook }) {

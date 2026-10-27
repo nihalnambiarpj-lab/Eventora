@@ -1,0 +1,49 @@
+{
+  "layoutType": "THEATRE",
+  "displayName": "Performing Arts & Broadway Theatre Layout",
+  "description": "Traditional acoustic theatre hall layout featuring proscenium stage, orchestra stalls, dress circle, and royal balcony.",
+  "screen": {
+    "type": "PROSCENIUM_STAGE",
+    "glowColor": "#eab308",
+    "subText": "THEATRE PROSCENIUM STAGE • ORCHESTRA PIT"
+  },
+  "dimensions": {
+    "rowsCount": 10,
+    "colsCount": 12,
+    "aisleGaps": [4, 8]
+  },
+  "tiers": [
+    {
+      "tier": "SILVER",
+      "displayName": "Upper Balcony",
+      "rows": ["A", "B", "C"],
+      "priceMultiplier": 1.0,
+      "color": "sky",
+      "description": "Elevated panoramic view of full stage choreography"
+    },
+    {
+      "tier": "GOLD",
+      "displayName": "Dress Circle",
+      "rows": ["D", "E", "F"],
+      "priceMultiplier": 1.4,
+      "color": "teal",
+      "description": "First-tier balcony with direct eye-level stage view"
+    },
+    {
+      "tier": "PREMIUM",
+      "displayName": "Orchestra Stalls",
+      "rows": ["G", "H"],
+      "priceMultiplier": 1.8,
+      "color": "purple",
+      "description": "Ground floor near the acoustic orchestra pit"
+    },
+    {
+      "tier": "RECLINER",
+      "displayName": "Royal Box",
+      "rows": ["I", "J"],
+      "priceMultiplier": 2.5,
+      "color": "amber",
+      "description": "Private royal balcony box with luxury velvet seating"
+    }
+  ]
+}

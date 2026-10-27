@@ -8,7 +8,10 @@
     "server": "node server/index.js",
     "seed": "node server/seed.js",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node server/tests/cancellation.test.js && node server/tests/booking.test.js",
+    "test:cancellation": "node server/tests/cancellation.test.js",
+    "test:concurrency": "node server/tests/booking.test.js"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",

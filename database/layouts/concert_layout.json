@@ -1,0 +1,50 @@
+{
+  "layoutType": "STAGE_CONCERT",
+  "displayName": "Live Concert & Stadium Arena Stage Layout",
+  "description": "Dynamic concert stadium layout with elevated performance stage, VIP Front Row Pit, Golden Fan Circle, and Elevated Arena Stands.",
+  "screen": {
+    "type": "PERFORMANCE_STAGE",
+    "focalLength": "180deg",
+    "glowColor": "#ec4899",
+    "subText": "MAIN PERFORMANCE STAGE • LIVE CONCERT ARENA"
+  },
+  "dimensions": {
+    "rowsCount": 10,
+    "colsCount": 20,
+    "aisleGaps": [5, 15]
+  },
+  "tiers": [
+    {
+      "tier": "SILVER",
+      "displayName": "General Arena Stands",
+      "rows": ["A", "B", "C", "D"],
+      "priceMultiplier": 1.0,
+      "color": "sky",
+      "description": "Standard stadium seating with clear line of sight"
+    },
+    {
+      "tier": "GOLD",
+      "displayName": "Golden Circle Seating",
+      "rows": ["E", "F"],
+      "priceMultiplier": 1.5,
+      "color": "teal",
+      "description": "Closer tier with premium concert audio experience"
+    },
+    {
+      "tier": "PREMIUM",
+      "displayName": "VIP Front Fan Zone",
+      "rows": ["G", "H"],
+      "priceMultiplier": 2.0,
+      "color": "purple",
+      "description": "Up-close proximity to stage performers and runway"
+    },
+    {
+      "tier": "RECLINER",
+      "displayName": "VIP Artist Lounge Box",
+      "rows": ["I", "J"],
+      "priceMultiplier": 3.0,
+      "color": "amber",
+      "description": "Exclusive elevated lounge box with hospitality and private bar"
+    }
+  ]
+}

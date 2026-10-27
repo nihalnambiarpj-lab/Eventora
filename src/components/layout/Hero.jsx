@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { featuredEvents } from '../data/events';
-import { apiFetch } from '../api/client';
+import { featuredEvents } from '../../data/events';
+import { apiFetch } from '../../api/client';
 
 const AUTO_ADVANCE_MS = 5000;
 

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Mail, User, AlertCircle, Sparkles, CheckCircle2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signup', alertMessage = '' }) {
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
